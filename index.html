@@ -58,9 +58,9 @@
 
         function newState(state) {
             state.questions = [];
-            for(var a = 1; a <= 12; a++) {
+            for(var a = 0; a <= 99; a++) {
 		    addQuestion(state, a + " + " + 1, a + 1, 10000);
-		    addQuestion(state, (a + 1) " - " + 1, a, 10000);
+		    addQuestion(state, (a + 1) + " - " + 1, a, 10000);
             }
 
             return state;
