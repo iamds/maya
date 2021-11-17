@@ -48,9 +48,9 @@
                 }
             }
 
-            if(state.version < 10) {
+            if(state.version < 11) {
                 state = newState(state);
-                state.version = 10;
+                state.version = 11;
             }
 
             return state;
@@ -58,7 +58,7 @@
 
         function newState(state) {
             state.questions = [];
-            for(var a = 0; a <= 12; a++) {
+            for(var a = 0; a <= 15; a++) {
 		addQuestion(state, a + " x 2", a * 2, 10000);
 		addQuestion(state, "2 x " + a, a * 2, 10000);
             }
