@@ -6,6 +6,7 @@
     <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <style>
         .center-screen {
             display: flex;
@@ -20,10 +21,8 @@
 </head>
 
 <body>
-    <div class="center-screen" style="margin-left: 5%; margin-right: 5%">
-        <div id="main" style="width: 100%">
+    <div id="main">
 
-        </div>
     </div>
     <script type="text/babel">
         function random(i) {
@@ -43,36 +42,32 @@
                 state = {
                     version: 1,
                     questions: [],
-                    totalTime: 0,
-                    score: []
+                    time: {},
+                    emojis: []
                 }
             }
 
-            if(state.version < 11) {
-                state = newState(state);
-                state.version = 11;
-            }
-
-            return state;
-        }
-
-        function newState(state) {
             state.questions = [];
-            for(var a = 0; a <= 15; a++) {
-		addQuestion(state, a + " x 2", a * 2, 10000);
-		addQuestion(state, "2 x " + a, a * 2, 10000);
-            }
+            getQuestions(state);
 
             return state;
         }
-        
+
+        function getQuestions(state) {
+            for(var a = 1; a <= 20; a++) {
+                addQuestion(state, a + " + ? = 20", 20 - a, 10000);
+                addQuestion(state, "? + " + a + " = 20", 20 - a, 10000);
+            }
+        }
+
         function addQuestion(state, text, answer, initialSpeed) {
 
             state.questions.push({
                 text: text,
                 answer: answer,
-                time: initialSpeed
             });
+
+            state.time[text] = state.time[text] || initialSpeed;
         }
 
         function Stats(props) {
@@ -95,10 +90,9 @@
                 </tbody>
             </table>
         }
- 
+
         function App(props) {
             const [state, _setState] = React.useState(getInitialState);
-            console.log(state);
             const setState = cb => {
                 _setState(oldState => {
                     const newState = cb(oldState);
@@ -107,33 +101,65 @@
                 });
             };
 
+            const [panel, setPanel] = React.useState("Questions");
+
+            const panelToShow = panel == "Questions" ? <Questions state={state} setState={setState}/> : <Settings state={state} setState={setState}/>;
+
+            return (
+             <div>
+                <button type="button" className="btn btn-default" aria-label="Left Align" onClick={()=>setPanel("Settings")}>
+                    <i className="fa fa-cog"></i>
+                </button>
+                { panelToShow }
+             </div>
+             );
+        }
+
+        function Settings(props) {
+            const possibleQuestions = [];
+
+            //addPlusOnesTo10(possibleQuestions);
+            //addPlusOnesTo20(possibleQuestions);
+            //addPlusOnesTo100(possibleQuestions);
+
+            return (
+            <form style={{marginLeft:"20px"}}>
+              <div className="checkbox"> <label> <input type="checkbox"/> Check me out </label> </div>
+              <div className="checkbox"> <label> <input type="checkbox"/> Check me out </label> </div>
+              <div className="checkbox"> <label> <input type="checkbox"/> Check me out </label> </div>
+              <div className="checkbox"> <label> <input type="checkbox"/> Check me out </label> </div>
+              <div className="checkbox"> <label> <input type="checkbox"/> Check me out ajskdfjalksjakdlfjkalsdjfklajskldfjkals</label> </div>
+              <div className="checkbox"> <label> <input type="checkbox"/> Check me out </label> </div>
+              <div className="checkbox"> <label> <input type="checkbox"/> Check me out </label> </div>
+              <div className="checkbox"> <label> <input type="checkbox"/> Check me out </label> </div>
+              <div className="checkbox"> <label> <input type="checkbox"/> Check me out </label> </div>
+              <div className="checkbox"> <label> <input type="checkbox"/> Check me out </label> </div>
+              <div className="checkbox"> <label> <input type="checkbox"/> Check me out </label> </div>
+              <div className="checkbox"> <label> <input type="checkbox"/> Check me out </label> </div>
+              <div className="checkbox"> <label> <input type="checkbox"/> Check me out </label> </div>
+              <div className="checkbox"> <label> <input type="checkbox"/> Check me out </label> </div>
+              <div className="checkbox"> <label> <input type="checkbox"/> Check me out </label> </div>
+              <div className="checkbox"> <label> <input type="checkbox"/> Check me out </label> </div>
+            </form>
+            );
+        }
+ 
+        function Questions(props) {
+
             const nextQuestion = () => {
-                var filter = a=>true;
-                if(window.location.hash) {
-                    const operation = window.location.hash.substr(1,1);
-                    const number = window.location.hash.substr(2,1);
-                    filter = a=> {
-                        const sp = a.split(" ");
-                        return sp[1] == operation && (sp[0] == number || sp[2] == number);
-                    }
-                }
 
-                const selectedQuestions = [];
-                var selectedTotalTime = 0;
-                for(var i = 0; i < state.questions.length; i++) {
-                    if(filter(state.questions[i].text)) {
-                        selectedQuestions.push(i);
-                        selectedTotalTime += state.questions[i].time;
-                    }
-                }
-
-                const t = random(selectedTotalTime) 
                 var totalTime = 0;
-                for(var i = 0; i < selectedQuestions.length; i++) {
-                    totalTime += state.questions[selectedQuestions[i]].time;
+                for(var i = 0; i < props.state.questions.length; i++) {
+                    totalTime += props.state.time[props.state.questions[i].text];
+                }
+
+                const t = random(totalTime)
+                totalTime = 0;
+                for(var i = 0; i < props.state.questions.length; i++) {
+                    totalTime += props.state.time[props.state.questions[i].text];
                     if (totalTime >= t) {
                         return {
-                            index: selectedQuestions[i],
+                            index: i,
                             startTime: new Date()
                         };
                     }
@@ -161,7 +187,6 @@
                             "🌍", "🌎", "🌏", "🌐", "🗺️", "🗾", "🏔️", "⛰️", "🗻", "🏕️", "🏖️", "🏜️", "🏝️", "🏞️", "🏟️", "🏛️", "🏗️", "🏘️", "🏚️", "🏠", "🏡", "🏢", "🏣", "🏤", "🏥", "🏦", "🏨", "🏩", "🏪", "🏫", "🏬", "🏭", "🏯", "🏰", "🗼", "🗽", "⛪", "🕌", "🕍", "⛩️", "🕋", "⛲", "⛺", "🏙️", "🎠", "🎡", "🎢", "🎪", "⛳", "🗿",
                             "💦", "🌋", "🌁", "🌃", "🌄", "🌅", "🌆", "🌇", "🌉", "🌌", "🌑", "🌒", "🌓", "🌔", "🌕", "🌖", "🌗", "🌘", "🌙", "🌚", "🌛", "🌜", "🌡️", "☀️", "🌝", "🌞", "🌟", "🌠", "☁️", "⛅", "⛈️", "🌤️", "🌥️", "🌦️", "🌧️", "🌨️", "🌩️", "🌪️", "🌫️", "🌬️", "🌀", "🌈", "☔", "❄️", "☃️", "⛄", "☄️", "💧", "🌊", "🎑"];
 
-
             const successText = [
                 "Well done",
                 "Woohoo",
@@ -187,11 +212,14 @@
             ]
 
             const onSubmit = e=>{
+
+                e.preventDefault();
+
                 setVisible(true);
                 setTimeout(()=>setVisible(false), 3000);
 
-                if(state.questions[current.index].answer == value) {
-                    setState(oldState=>{
+                if(props.state.questions[current.index].answer == value) {
+                    props.setState(oldState=>{
                         const todayDate = new Date();
                         todayDate.setHours(0);
                         todayDate.setMinutes(0);
@@ -199,13 +227,13 @@
                         todayDate.setMilliseconds(0);
                         const today = todayDate.getTime();
 
-                        if(oldState.score.length == 0 || oldState.score[oldState.score.length - 1].date - today != 0) {
-                            oldState.score.push({date: today, score: 0, emojis: ""});
+                        if(oldState.emojis.length == 0 || oldState.emojis[oldState.emojis.length - 1].date - today != 0) {
+                            oldState.emojis.push({date: today, score: 0, emojis: ""});
                         }
-                        oldState.score[oldState.score.length - 1].score++;
-                        oldState.score[oldState.score.length - 1].emojis = emojis[random(emojis.length)] + oldState.score[oldState.score.length - 1].emojis;
+                        oldState.emojis[oldState.emojis.length - 1].score++;
+                        oldState.emojis[oldState.emojis.length - 1].emojis = emojis[random(emojis.length)] + oldState.emojis[oldState.emojis.length - 1].emojis;
                             
-                        const oldTime = oldState.questions[current.index].time;
+                        const oldTime = oldState.time[oldState.questions[current.index].text];
                             
                         const secondsToAnswer = (new Date() - current.startTime) / 1000;
 
@@ -213,7 +241,7 @@
 
                         const averageTime = Math.round(oldTime * 0.5 + newTime * 0.5);
                             
-                        oldState.questions[current.index].time = averageTime;
+                        oldState.time[oldState.questions[current.index].text] = averageTime;
 
                         return oldState;
                     });
@@ -239,31 +267,35 @@
             }
 
             return (
+                <div className="center-screen" style={{marginLeft: "5%", marginRight: "5%"}}>
+                <div style={{width: "100%"}}>
                 <h1>
-                    <div style={{ textAlign: "center", width: "auto" }}>
-                        Maya's take aways and adds
+                <div style={{ textAlign: "center", width: "auto" }}>
+                    Robyn's take aways and adds
+                </div>
+                <div style={{opacity: visible?1:0, transitionProperty: "opacity", transitionDuration: visible?"0s":"1s"}}>
+                    <div style={{textAlign: "center", width: "auto"}} className={"alert " + banner.class}>
+                        {banner.text}
                     </div>
-                    <div style={{opacity: visible?1:0, transitionProperty: "opacity", transitionDuration: visible?"0s":"1s"}}>
-                        <div style={{textAlign: "center", width: "auto"}} className={"alert " + banner.class}>
-                            {banner.text}
-                        </div>
-                    </div>
-                    <div className="shadow p-3 mb-5 bg-white rounded">
-                        <div style={{padding: "30px"}}>
-                            <form className="form-group" onSubmit={onSubmit} style={{textAlign: "center"}}>
-                                <label htmlFor="answer" style={{textAlign: "center", fontSize:"2em"}}> {state.questions[current.index].text} </label>
-                                <div><input autoFocus={true} style={{margin: "auto", fontSize:"2em", position: "relative", textAlign: "center", width: "5em"}} className="form-control form-control-lg" id="answer" ref={inputRef} type="number" min="0" value={value} onChange={e=>setValue(e.target.value)} /></div>
-                                <span><input className="btn btn-primary" type="submit" value="Submit" /></span>
-                            </form>
-                            <Score score={state.score}/>
-                       </div>
-                    </div>
+                </div>
+                <div className="shadow p-3 mb-5 bg-white rounded">
+                    <div style={{padding: "30px"}}>
+                        <form className="form-group" onSubmit={onSubmit} style={{textAlign: "center"}}>
+                            <label htmlFor="answer" style={{textAlign: "center", fontSize:"2em"}}> {props.state.questions[current.index].text} </label>
+                            <div><input autoFocus={true} style={{margin: "auto", fontSize:"2em", position: "relative", textAlign: "center", width: "5em"}} className="form-control form-control-lg" id="answer" ref={inputRef} type="number" min="0" value={value} onChange={e=>setValue(e.target.value)} /></div>
+                            <span><input className="btn btn-primary" type="submit" value="Submit" /></span>
+                        </form>
+                        <Score emojis={props.state.emojis}/>
+                   </div>
+                </div>
                 </h1>
-                );
+                </div>
+                </div>
+            );
         }
 
         function Score(props) {
-            const score = props.score.slice();
+            const score = props.emojis.slice();
             return score.reverse().map(e=>{
                 return <div style={{ marginLeft:"10%", marginRight:"10%" }}>
                     <div style={{ textAlign: "left" }}><h5><span className="badge badge-light">{new Date(e.date).toDateString()}</span></h5></div>
@@ -273,11 +305,12 @@
                 </div>
             })
         }
-            if (window.location.hash && window.location.hash.substring(1) == "stats") {
-                ReactDOM.render(<Stats />, document.getElementById('main'));
-            } else {
-                ReactDOM.render(<App />, document.getElementById('main'));
-            }
+
+        if (window.location.hash && window.location.hash.substring(1) == "stats") {
+            ReactDOM.render(<Stats />, document.getElementById('main'));
+        } else {
+            ReactDOM.render(<App />, document.getElementById('main'));
+        }
 
     </script>
 </body>
