@@ -72,7 +72,7 @@
 
         function Stats(props) {
             const [state, _setState] = React.useState(getInitialState);
-            
+
             return <table className="table">
                 <thead>
                     <tr>
@@ -81,10 +81,10 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {state.questions.sort((a, b) => b.time - a.time).map(q=>{
+                    {Object.entries(state.time).sort((a, b) => b[1] - a[1]).map(q=>{
                         return <tr>
-                            <td>{q.text}</td>
-                            <td>{Math.round(Math.sqrt(q.time))}s</td>
+                            <td>{q[0]}</td>
+                            <td>{Math.round(Math.sqrt(q[1]))}s</td>
                         </tr>
                     })}
                 </tbody>
@@ -271,7 +271,7 @@
                 <div style={{width: "100%"}}>
                 <h1>
                 <div style={{ textAlign: "center", width: "auto" }}>
-                    Robyn's take aways and adds
+                    Emoji Maths
                 </div>
                 <div style={{opacity: visible?1:0, transitionProperty: "opacity", transitionDuration: visible?"0s":"1s"}}>
                     <div style={{textAlign: "center", width: "auto"}} className={"alert " + banner.class}>
